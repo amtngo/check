@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>오늘 기록</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      background:#111;
+      color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      padding:20px;
+      max-width:700px;
+      margin:0 auto;
+    }
+
+    h1{
+      font-size:30px;
+      margin-bottom:8px;
+    }
+
+    .sub{
+      color:#999;
+      margin-bottom:30px;
+      line-height:1.5;
+    }
+
+    .login-box{
+      margin-top:40px;
+    }
+
+    input{
+      width:100%;
+      padding:16px;
+      border:none;
+      border-radius:14px;
+      margin-bottom:12px;
+      font-size:16px;
+      background:#222;
+      color:#fff;
+    }
+
+    button{
+      width:100%;
+      padding:16px;
+      border:none;
+      border-radius:14px;
+      background:#fff;
+      color:#111;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .top-box{
+      margin-top:20px;
+      margin-bottom:25px;
+    }
+
+    .percent{
+      font-size:40px;
+      font-weight:bold;
+      margin-bottom:10px;
+    }
+
+    .progress{
+      display:flex;
+      gap:4px;
+      margin-bottom:10px;
+    }
+
+    .bar{
+      flex:1;
+      height:10px;
+      border-radius:99px;
+      background:#333;
+    }
+
+    .bar.active{
+      background:#fff;
+    }
+
+    .todo-list{
+      margin-top:20px;
+    }
+
+    .todo-item{
+      background:#1c1c1c;
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      flex:1;
+      cursor:pointer;
+    }
+
+    .check{
+      width:24px;
+      height:24px;
+      border:2px solid #777;
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:14px;
+    }
+
+    .done .check{
+      background:#fff;
+      color:#111;
+      border-color:#fff;
+    }
+
+    .done .text{
+      text-decoration:line-through;
+      color:#777;
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+    }
+
+    .small-btn{
+      padding:8px 10px;
+      border:none;
+      border-radius:10px;
+      font-size:12px;
+      cursor:pointer;
+    }
+
+    .edit-btn{
+      background:#333;
+      color:#fff;
+    }
+
+    .delete-btn{
+      background:#5a1e1e;
+      color:#fff;
+    }
+
+    .add-box{
+      margin-top:25px;
+      display:flex;
+      gap:10px;
+    }
+
+    .add-box input{
+      margin-bottom:0;
+    }
+
+    .week-box{
+      margin-top:40px;
+    }
+
+    .week-title{
+      font-size:20px;
+      margin-bottom:15px;
+    }
+
+    .week-item{
+      background:#1c1c1c;
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:10px;
+      display:flex;
+      justify-content:space-between;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    .msg{
+      margin-top:15px;
+      color:#aaa;
+      line-height:1.5;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="loginArea">
+
+    <h1>오늘 기록</h1>
+
+    <div class="sub">
+      체크 기록은 계정에 저장됩니다<br>
+      이메일만 입력하면 계속 사용할 수 있습니다
+    </div>
+
+    <div class="login-box">
+      <input type="email" id="email" placeholder="이메일 입력">
+
+      <button onclick="login()">
+        기록 시작하기
+      </button>
+
+      <div class="msg" id="loginMsg"></div>
+    </div>
+
+  </div>
+
+  <div id="appArea" class="hidden">
+
+    <div class="top-box">
+
+      <div class="percent" id="percentText">
+        0%
+      </div>
+
+      <div class="progress" id="progressBar"></div>
+
+      <div class="sub">
+        오늘 완료율
+      </div>
+
+    </div>
+
+    <div class="todo-list" id="todoList"></div>
+
+    <div class="add-box">
+
+      <input type="text" id="newTodo" placeholder="할 일 추가">
+
+      <button onclick="addTodo()">
+        추가
+      </button>
+
+    </div>
+
+    <div class="week-box">
+
+      <div class="week-title">
+        최근 기록
+      </div>
+
+      <div class="week-item">
+        <span>이번 주</span>
+        <span>82%</span>
+      </div>
+
+      <div class="week-item">
+        <span>지난 주</span>
+        <span>64%</span>
+      </div>
+
+      <div class="week-item">
+        <span>2주 전</span>
+        <span>91%</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    // =========================
+    // 여기에 본인 Supabase 정보 입력
+    // =========================
+
+    const SUPABASE_URL = "https://rtnvudczmsghntcjeydl.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0bnZ1ZGN6bXNnaG50Y2pleWRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDQyMDEsImV4cCI6MjA5NDA4MDIwMX0.H6Y3mJdxYeBtQbfjsPO1X_MJ5ZC_onwwtIJKQCGku1E";
+
+    const supabaseClient = supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    // =========================
+    // 기본 체크리스트
+    // =========================
+
+    let todos = [
+      { text:"물 마시기", done:false },
+      { text:"운동하기", done:false },
+      { text:"오늘 해야 할 일 정리하기", done:false }
+    ];
+
+    // =========================
+    // 로그인
+    // =========================
+
+    async function login(){
+
+      const email = document.getElementById("email").value;
+
+      if(!email){
+        alert("이메일을 입력해주세요");
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email: email
+      });
+
+      if(error){
+        alert("error.message");
+        return;
+      }
+
+      document.getElementById("loginMsg").innerHTML =
+        "이메일로 로그인 링크를 보냈습니다";
+
+    }
+
+    // =========================
+    // 로그인 체크
+    // =========================
+
+    async function checkUser(){
+
+      const {
+        data:{ session }
+      } = await supabaseClient.auth.getSession();
+
+      if(session){
+
+        document.getElementById("loginArea")
+          .classList.add("hidden");
+
+        document.getElementById("appArea")
+          .classList.remove("hidden");
+
+        loadTodos();
+      }
+
+    }
+
+    checkUser();
+
+    // =========================
+    // 투두 렌더링
+    // =========================
+
+    function renderTodos(){
+
+      const list = document.getElementById("todoList");
+
+      list.innerHTML = "";
+
+      todos.forEach((todo,index)=>{
+
+        const div = document.createElement("div");
+
+        div.className =
+          "todo-item " + (todo.done ? "done" : "");
+
+        div.innerHTML = `
+          <div class="left" onclick="toggleTodo(${index})">
+
+            <div class="check">
+              ${todo.done ? "✓" : ""}
+            </div>
+
+            <div class="text">
+              ${todo.text}
+            </div>
+
+          </div>
+
+          <div class="actions">
+
+            <button class="small-btn edit-btn"
+              onclick="editTodo(${index})">
+              수정
+            </button>
+
+            <button class="small-btn delete-btn"
+              onclick="deleteTodo(${index})">
+              삭제
+            </button>
+
+          </div>
+        `;
+
+        list.appendChild(div);
+
+      });
+
+      updatePercent();
+
+      saveTodos();
+
+    }
+
+    // =========================
+    // 체크 토글
+    // =========================
+
+    function toggleTodo(index){
+
+      todos[index].done =
+        !todos[index].done;
+
+      renderTodos();
+
+    }
+
+    // =========================
+    // 추가
+    // =========================
+
+    function addTodo(){
+
+      const input =
+        document.getElementById("newTodo");
+
+      const value =
+        input.value.trim();
+
+      if(!value) return;
+
+      todos.push({
+        text:value,
+        done:false
+      });
+
+      input.value = "";
+
+      renderTodos();
+
+    }
+
+    // =========================
+    // 삭제
+    // =========================
+
+    function deleteTodo(index){
+
+      todos.splice(index,1);
+
+      renderTodos();
+
+    }
+
+    // =========================
+    // 수정
+    // =========================
+
+    function editTodo(index){
+
+      const current =
+        todos[index].text;
+
+      const next =
+        prompt("수정",current);
+
+      if(next === null) return;
+
+      todos[index].text = next;
+
+      renderTodos();
+
+    }
+
+    // =========================
+    // 완료율
+    // =========================
+
+    function updatePercent(){
+
+      const total = todos.length;
+
+      const done =
+        todos.filter(t=>t.done).length;
+
+      const percent =
+        total === 0
+          ? 0
+          : Math.round((done/total)*100);
+
+      document.getElementById("percentText")
+        .innerText = percent + "%";
+
+      const progress =
+        document.getElementById("progressBar");
+
+      progress.innerHTML = "";
+
+      const activeBars =
+        Math.round(percent / 10);
+
+      for(let i=0;i<10;i++){
+
+        const div =
+          document.createElement("div");
+
+        div.className =
+          "bar " + (i < activeBars ? "active" : "");
+
+        progress.appendChild(div);
+
+      }
+
+    }
+
+    // =========================
+    // 저장
+    // =========================
+
+    function saveTodos(){
+
+      localStorage.setItem(
+        "todos",
+        JSON.stringify(todos)
+      );
+
+    }
+
+    // =========================
+    // 불러오기
+    // =========================
+
+    function loadTodos(){
+
+      const saved =
+        localStorage.getItem("todos");
+
+      if(saved){
+
+        todos = JSON.parse(saved);
+
+      }
+
+      renderTodos();
+
+    }
+
+  </script>
+
+</body>
+</html>
