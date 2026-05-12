@@ -88,6 +88,14 @@
       background:#777;
     }
 
+    .reset-text{
+      margin-top:18px;
+      text-align:center;
+      font-size:13px;
+      color:#555;
+      line-height:1.5;
+    }
+
     @media(max-width:480px){
 
       h1{
@@ -107,15 +115,9 @@
       .reset-btn{
         font-size:17px;
       }
-  
-.reset-text{
-  margin-top:18px;
-  text-align:center;
-  font-size:13px;
-  color:#555;
-  line-height:1.5;
-}
-        }
+
+    }
+
   </style>
 </head>
 
@@ -130,11 +132,11 @@
     <button class="add-btn" id="addBtn">
       + 추가 하기
     </button>
-    
+
     <div class="reset-text">
-  다음 사용 전 초기화를 권장합니다
-</div>
-    
+      다음 사용 전 초기화를 권장합니다
+    </div>
+
     <button class="reset-btn" id="resetBtn">
       초기화
     </button>
@@ -160,7 +162,18 @@
 
 
 
-    let items = JSON.parse(localStorage.getItem("daisoChecklist")) || defaultItems;
+    let items = JSON.parse(localStorage.getItem("daisoChecklist"));
+
+
+
+    if(!items){
+
+      items = defaultItems.map(item => ({
+        text:item.text,
+        checked:false
+      }));
+
+    }
 
 
 
@@ -205,7 +218,6 @@
 
 
         const checkbox = item.querySelector("input");
-        const textDiv = item.querySelector(".text");
         const editBtn = item.querySelector(".edit-btn");
         const deleteBtn = item.querySelector(".delete-btn");
 
@@ -301,20 +313,24 @@
 
 
 
-     if(check){
+      if(check){
 
-  localStorage.removeItem("daisoChecklist");
+        localStorage.removeItem("daisoChecklist");
 
-  items = defaultItems.map(item => ({
-    text:item.text,
-    checked:false
-  }));
 
-  saveItems();
 
-  render();
+        items = defaultItems.map(item => ({
+          text:item.text,
+          checked:false
+        }));
 
-}
+
+
+        saveItems();
+
+        render();
+
+      }
 
     });
 
