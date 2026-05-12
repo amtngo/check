@@ -1,1 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>쿠팡 체크리스트</title>
 
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#fff3f0;
+      font-family:sans-serif;
+      color:#111;
+    }
+
+    .wrap{
+      max-width:520px;
+      margin:0 auto;
+      padding:40px 20px 80px;
+    }
+
+    h1{
+      text-align:center;
+      font-size:42px;
+      font-weight:900;
+      margin-bottom:40px;
+      letter-spacing:-2px;
+      color:#e95420;
+    }
+
+    .item{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:7px 0;
+      border-bottom:1px dashed #555;
+    }
+
+    .item input[type="checkbox"]{
+      width:22px;
+      height:22px;
+      accent-color:#e95420;
+      flex-shrink:0;
+    }
+
+    .text{
+      flex:1;
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .menu{
+      display:flex;
+      gap:6px;
+      flex-shrink:0;
+    }
+
+    .menu button{
+      border:none;
+      background:#111;
+      color:#fff;
+      padding:5px 8px;
+      border-radius:8px;
+      font-size:11px;
+      cursor:pointer;
+    }
+
+    .add-btn,
+    .reset-btn{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:14px;
+      color:#fff;
+      font-size:18px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .add-btn{
+      margin-top:28px;
+      background:#e95420;
+    }
+
+    .reset-btn{
+      margin-top:12px;
+      background:#777;
+    }
+
+    .reset-text{
+      margin-top:18px;
+      text-align:center;
+      font-size:13px;
+      color:#555;
+      line-height:1.5;
+    }
+
+    @media(max-width:480px){
+
+      h1{
+        font-size:30px;
+      }
+
+      .text{
+        font-size:16px;
+      }
+
+      .menu button{
+        font-size:10px;
+        padding:5px 7px;
+      }
+
+      .add-btn,
+      .reset-btn{
+        font-size:17px;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="wrap">
+
+    <h1>쿠팡 체크리스트</h1>
+
+    <div id="list"></div>
+
+    <button class="add-btn" id="addBtn">
+      + 추가 하기
+    </button>
+
+    <div class="reset-text">
+      다음 사용 전 초기화를 권장합니다
+    </div>
+
+    <button class="reset-btn" id="resetBtn">
+      초기화
+    </button>
+
+  </div>
+
+  <script>
+
+    const addBtn = document.getElementById("addBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const list = document.getElementById("list");
+
+
+
+    const defaultItems = [
+      { text:"생수", checked:false },
+      { text:"라면", checked:false },
+      { text:"휴지", checked:false },
+      { text:"세제", checked:false },
+      { text:"칫솔", checked:false },
+      { text:"샴푸", checked:false }
+    ];
+
+
+
+    let items = JSON.parse(localStorage.getItem("coupangChecklist"));
+
+
+
+    if(!items){
+
+      items = defaultItems.map(item => ({
+        text:item.text,
+        checked:false
+      }));
+
+    }
+
+
+
+    function saveItems(){
+
+      localStorage.setItem(
+        "coupangChecklist",
+        JSON.stringify(items)
+      );
+
+    }
+
+
+
+    function render(){
+
+      list.innerHTML = "";
+
+
+
+      items.forEach((itemData, index) => {
+
+        const item = document.createElement("div");
+
+        item.className = "item";
+
+
+
+        item.innerHTML = `
+
+          <input type="checkbox" ${itemData.checked ? "checked" : ""}>
+
+          <div class="text">${itemData.text}</div>
+
+          <div class="menu">
+            <button class="edit-btn">수정</button>
+            <button class="delete-btn">삭제</button>
+          </div>
+
+        `;
+
+
+
+        const checkbox = item.querySelector("input");
+        const editBtn = item.querySelector(".edit-btn");
+        const deleteBtn = item.querySelector(".delete-btn");
+
+
+
+        checkbox.addEventListener("change", () => {
+
+          items[index].checked = checkbox.checked;
+
+          saveItems();
+
+        });
+
+
+
+        editBtn.addEventListener("click", () => {
+
+          const newText = prompt(
+            "수정할 내용 입력",
+            items[index].text
+          );
+
+
+
+          if(newText && newText.trim() !== ""){
+
+            items[index].text = newText;
+
+            saveItems();
+
+            render();
+
+          }
+
+        });
+
+
+
+        deleteBtn.addEventListener("click", () => {
+
+          const check = confirm("삭제하시겠습니까?");
+
+
+
+          if(check){
+
+            items.splice(index,1);
+
+            saveItems();
+
+            render();
+
+          }
+
+        });
+
+
+
+        list.appendChild(item);
+
+      });
+
+    }
+
+
+
+    addBtn.addEventListener("click", () => {
+
+      const text = prompt("추가할 목록 입력");
+
+
+
+      if(text && text.trim() !== ""){
+
+        items.push({
+          text:text,
+          checked:false
+        });
+
+        saveItems();
+
+        render();
+
+      }
+
+    });
+
+
+
+    resetBtn.addEventListener("click", () => {
+
+      const check = confirm("정말 초기화하시겠습니까?");
+
+
+
+      if(check){
+
+        localStorage.removeItem("coupangChecklist");
+
+
+
+        items = defaultItems.map(item => ({
+          text:item.text,
+          checked:false
+        }));
+
+
+
+        saveItems();
+
+        render();
+
+      }
+
+    });
+
+
+
+    render();
+
+  </script>
+
+</body>
+</html>
