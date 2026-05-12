@@ -116,8 +116,8 @@
         <div class="text">건전지</div>
 
         <div class="menu">
-          <button>수정</button>
-          <button>삭제</button>
+          <button class="edit-btn">수정</button>
+          <button class="delete-btn">삭제</button>
         </div>
       </div>
 
@@ -127,8 +127,8 @@
         <div class="text">지퍼백</div>
 
         <div class="menu">
-          <button>수정</button>
-          <button>삭제</button>
+          <button class="edit-btn">수정</button>
+          <button class="delete-btn">삭제</button>
         </div>
       </div>
 
@@ -138,8 +138,8 @@
         <div class="text">청소포</div>
 
         <div class="menu">
-          <button>수정</button>
-          <button>삭제</button>
+          <button class="edit-btn">수정</button>
+          <button class="delete-btn">삭제</button>
         </div>
       </div>
 
@@ -149,8 +149,8 @@
         <div class="text">멀티탭</div>
 
         <div class="menu">
-          <button>수정</button>
-          <button>삭제</button>
+          <button class="edit-btn">수정</button>
+          <button class="delete-btn">삭제</button>
         </div>
       </div>
 
@@ -160,8 +160,8 @@
         <div class="text">정리함</div>
 
         <div class="menu">
-          <button>수정</button>
-          <button>삭제</button>
+          <button class="edit-btn">수정</button>
+          <button class="delete-btn">삭제</button>
         </div>
       </div>
 
@@ -171,8 +171,8 @@
         <div class="text">테이프</div>
 
         <div class="menu">
-          <button>수정</button>
-          <button>삭제</button>
+          <button class="edit-btn">수정</button>
+          <button class="delete-btn">삭제</button>
         </div>
       </div>
 
@@ -188,6 +188,50 @@
 
     const addBtn = document.getElementById("addBtn");
     const list = document.getElementById("list");
+
+
+
+    function addEvents(item){
+
+      const editBtn = item.querySelector(".edit-btn");
+      const deleteBtn = item.querySelector(".delete-btn");
+      const textDiv = item.querySelector(".text");
+
+
+
+      editBtn.addEventListener("click", () => {
+
+        const currentText = textDiv.innerText;
+
+        const newText = prompt("수정할 내용 입력", currentText);
+
+        if(newText && newText.trim() !== ""){
+          textDiv.innerText = newText;
+        }
+
+      });
+
+
+
+      deleteBtn.addEventListener("click", () => {
+
+        const check = confirm("삭제하시겠습니까?");
+
+        if(check){
+          item.remove();
+        }
+
+      });
+
+    }
+
+
+
+    document.querySelectorAll(".item").forEach(item => {
+      addEvents(item);
+    });
+
+
 
     addBtn.addEventListener("click", () => {
 
@@ -205,12 +249,14 @@
           <div class="text">${text}</div>
 
           <div class="menu">
-            <button>수정</button>
-            <button>삭제</button>
+            <button class="edit-btn">수정</button>
+            <button class="delete-btn">삭제</button>
           </div>
         `;
 
         list.appendChild(item);
+
+        addEvents(item);
 
       }
 
