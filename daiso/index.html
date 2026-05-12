@@ -1,1 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다이소 체크리스트</title>
 
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#fff9cc;
+      font-family:sans-serif;
+      color:#111;
+    }
+
+    .wrap{
+      max-width:520px;
+      margin:0 auto;
+      padding:40px 20px 80px;
+    }
+
+    h1{
+      text-align:center;
+      font-size:42px;
+      font-weight:900;
+      margin-bottom:40px;
+      letter-spacing:-2px;
+    }
+
+    .item{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:7px 0;
+      border-bottom:1px dashed #555;
+    }
+
+    .item input[type="checkbox"]{
+      width:22px;
+      height:22px;
+      accent-color:#111;
+      flex-shrink:0;
+    }
+
+    .text{
+      flex:1;
+      font-size:18px;
+      font-weight:700;
+    }
+
+    .menu{
+      display:flex;
+      gap:6px;
+      flex-shrink:0;
+    }
+
+    .menu button{
+      border:none;
+      background:#111;
+      color:#fff;
+      padding:5px 8px;
+      border-radius:8px;
+      font-size:11px;
+      cursor:pointer;
+    }
+
+    .add-btn{
+      width:100%;
+      margin-top:28px;
+      padding:16px;
+      border:none;
+      border-radius:14px;
+      background:#111;
+      color:#fff;
+      font-size:18px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    @media(max-width:480px){
+
+      h1{
+        font-size:30px;
+      }
+
+      .text{
+        font-size:16px;
+      }
+
+      .menu button{
+        font-size:10px;
+        padding:5px 7px;
+      }
+
+      .add-btn{
+        font-size:17px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="wrap">
+
+    <h1>다이소 체크리스트</h1>
+
+    <div id="list">
+
+      <div class="item">
+        <input type="checkbox">
+
+        <div class="text">건전지</div>
+
+        <div class="menu">
+          <button>수정</button>
+          <button>삭제</button>
+        </div>
+      </div>
+
+      <div class="item">
+        <input type="checkbox">
+
+        <div class="text">지퍼백</div>
+
+        <div class="menu">
+          <button>수정</button>
+          <button>삭제</button>
+        </div>
+      </div>
+
+      <div class="item">
+        <input type="checkbox">
+
+        <div class="text">청소포</div>
+
+        <div class="menu">
+          <button>수정</button>
+          <button>삭제</button>
+        </div>
+      </div>
+
+      <div class="item">
+        <input type="checkbox">
+
+        <div class="text">멀티탭</div>
+
+        <div class="menu">
+          <button>수정</button>
+          <button>삭제</button>
+        </div>
+      </div>
+
+      <div class="item">
+        <input type="checkbox">
+
+        <div class="text">정리함</div>
+
+        <div class="menu">
+          <button>수정</button>
+          <button>삭제</button>
+        </div>
+      </div>
+
+      <div class="item">
+        <input type="checkbox">
+
+        <div class="text">테이프</div>
+
+        <div class="menu">
+          <button>수정</button>
+          <button>삭제</button>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="add-btn" id="addBtn">
+      + 추가 하기
+    </button>
+
+  </div>
+
+  <script>
+
+    const addBtn = document.getElementById("addBtn");
+    const list = document.getElementById("list");
+
+    addBtn.addEventListener("click", () => {
+
+      const text = prompt("추가할 목록 입력");
+
+      if(text && text.trim() !== ""){
+
+        const item = document.createElement("div");
+
+        item.className = "item";
+
+        item.innerHTML = `
+          <input type="checkbox">
+
+          <div class="text">${text}</div>
+
+          <div class="menu">
+            <button>수정</button>
+            <button>삭제</button>
+          </div>
+        `;
+
+        list.appendChild(item);
+
+      }
+
+    });
+
+  </script>
+
+</body>
+</html>
