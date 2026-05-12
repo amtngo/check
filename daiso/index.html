@@ -301,15 +301,20 @@
 
 
 
-      if(check){
+     if(check){
 
-        localStorage.removeItem("daisoChecklist");
+  localStorage.removeItem("daisoChecklist");
 
-        items = [...defaultItems];
+  items = defaultItems.map(item => ({
+    text:item.text,
+    checked:false
+  }));
 
-        render();
+  saveItems();
 
-      }
+  render();
+
+}
 
     });
 
