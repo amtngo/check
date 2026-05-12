@@ -118,75 +118,7 @@
 
     <h1>다이소 체크리스트</h1>
 
-    <div id="list">
-
-      <div class="item">
-        <input type="checkbox">
-
-        <div class="text">건전지</div>
-
-        <div class="menu">
-          <button class="edit-btn">수정</button>
-          <button class="delete-btn">삭제</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <input type="checkbox">
-
-        <div class="text">지퍼백</div>
-
-        <div class="menu">
-          <button class="edit-btn">수정</button>
-          <button class="delete-btn">삭제</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <input type="checkbox">
-
-        <div class="text">청소포</div>
-
-        <div class="menu">
-          <button class="edit-btn">수정</button>
-          <button class="delete-btn">삭제</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <input type="checkbox">
-
-        <div class="text">멀티탭</div>
-
-        <div class="menu">
-          <button class="edit-btn">수정</button>
-          <button class="delete-btn">삭제</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <input type="checkbox">
-
-        <div class="text">정리함</div>
-
-        <div class="menu">
-          <button class="edit-btn">수정</button>
-          <button class="delete-btn">삭제</button>
-        </div>
-      </div>
-
-      <div class="item">
-        <input type="checkbox">
-
-        <div class="text">테이프</div>
-
-        <div class="menu">
-          <button class="edit-btn">수정</button>
-          <button class="delete-btn">삭제</button>
-        </div>
-      </div>
-
-    </div>
+    <div id="list"></div>
 
     <button class="add-btn" id="addBtn">
       + 추가 하기
@@ -206,35 +138,122 @@
 
 
 
-    function addEvents(item){
-
-      const editBtn = item.querySelector(".edit-btn");
-      const deleteBtn = item.querySelector(".delete-btn");
-      const textDiv = item.querySelector(".text");
-
-
-
-      editBtn.addEventListener("click", () => {
-
-        const currentText = textDiv.innerText;
-
-        const newText = prompt("수정할 내용 입력", currentText);
-
-        if(newText && newText.trim() !== ""){
-          textDiv.innerText = newText;
-        }
-
-      });
+    const defaultItems = [
+      { text:"건전지", checked:false },
+      { text:"지퍼백", checked:false },
+      { text:"청소포", checked:false },
+      { text:"멀티탭", checked:false },
+      { text:"정리함", checked:false },
+      { text:"테이프", checked:false }
+    ];
 
 
 
-      deleteBtn.addEventListener("click", () => {
+    let items = JSON.parse(localStorage.getItem("daisoChecklist")) || defaultItems;
 
-        const check = confirm("삭제하시겠습니까?");
 
-        if(check){
-          item.remove();
-        }
+
+    function saveItems(){
+
+      localStorage.setItem(
+        "daisoChecklist",
+        JSON.stringify(items)
+      );
+
+    }
+
+
+
+    function render(){
+
+      list.innerHTML = "";
+
+
+
+      items.forEach((itemData, index) => {
+
+        const item = document.createElement("div");
+
+        item.className = "item";
+
+
+
+        item.innerHTML = `
+
+          <input type="checkbox" ${itemData.checked ? "checked" : ""}>
+
+          <div class="text">${itemData.text}</div>
+
+          <div class="menu">
+            <button class="edit-btn">수정</button>
+            <button class="delete-btn">삭제</button>
+          </div>
+
+        `;
+
+
+
+        const checkbox = item.querySelector("input");
+        const textDiv = item.querySelector(".text");
+        const editBtn = item.querySelector(".edit-btn");
+        const deleteBtn = item.querySelector(".delete-btn");
+
+
+
+        checkbox.addEventListener("change", () => {
+
+          items[index].checked = checkbox.checked;
+
+          saveItems();
+
+        });
+
+
+
+        editBtn.addEventListener("click", () => {
+
+          const newText = prompt(
+            "수정할 내용 입력",
+            items[index].text
+          );
+
+
+
+          if(newText && newText.trim() !== ""){
+
+            items[index].text = newText;
+
+            saveItems();
+
+            render();
+
+          }
+
+        });
+
+
+
+        deleteBtn.addEventListener("click", () => {
+
+          const check = confirm("삭제하시겠습니까?");
+
+
+
+          if(check){
+
+            items.splice(index,1);
+
+            saveItems();
+
+            render();
+
+          }
+
+        });
+
+
+
+        list.appendChild(item);
 
       });
 
@@ -242,36 +261,22 @@
 
 
 
-    document.querySelectorAll(".item").forEach(item => {
-      addEvents(item);
-    });
-
-
-
     addBtn.addEventListener("click", () => {
 
       const text = prompt("추가할 목록 입력");
 
+
+
       if(text && text.trim() !== ""){
 
-        const item = document.createElement("div");
+        items.push({
+          text:text,
+          checked:false
+        });
 
-        item.className = "item";
+        saveItems();
 
-        item.innerHTML = `
-          <input type="checkbox">
-
-          <div class="text">${text}</div>
-
-          <div class="menu">
-            <button class="edit-btn">수정</button>
-            <button class="delete-btn">삭제</button>
-          </div>
-        `;
-
-        list.appendChild(item);
-
-        addEvents(item);
+        render();
 
       }
 
@@ -283,11 +288,23 @@
 
       const check = confirm("정말 초기화하시겠습니까?");
 
+
+
       if(check){
-        location.reload();
+
+        localStorage.removeItem("daisoChecklist");
+
+        items = [...defaultItems];
+
+        render();
+
       }
 
     });
+
+
+
+    render();
 
   </script>
 
